@@ -16,6 +16,7 @@ const HomePage = () => {
     { id: 'anime', name: '애니메이션', color: 'bg-purple-100 text-purple-800' },
     { id: 'drama', name: '드라마', color: 'bg-pink-100 text-pink-800' },
     { id: 'news', name: '뉴스', color: 'bg-orange-100 text-orange-800' },
+    { id: 'music', name: '노래', color: 'bg-yellow-100 text-yellow-800' },
   ];
   
   const contents = [
@@ -26,6 +27,7 @@ const HomePage = () => {
       level: "N2",
       duration: "12:34",
       thumbnail: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=225&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
       rating: 4.8,
       description: "실제 일본 회사 회의에서 사용되는 표현들을 배워보세요"
     },
@@ -36,6 +38,7 @@ const HomePage = () => {
       level: "N1",
       duration: "8:45",
       thumbnail: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=225&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
       rating: 4.9,
       description: "최신 일본 뉴스를 통해 고급 일본어 표현을 익혀보세요"
     },
@@ -46,6 +49,7 @@ const HomePage = () => {
       level: "N3",
       duration: "15:20",
       thumbnail: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=225&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
       rating: 4.7,
       description: "인기 애니메이션 장면으로 자연스러운 일본어 대화 익히기"
     },
@@ -56,6 +60,7 @@ const HomePage = () => {
       level: "N2",
       duration: "10:12",
       thumbnail: "https://images.unsplash.com/photo-1489599043532-1a4d8aad3a3c?w=400&h=225&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
       rating: 4.6,
       description: "일본 드라마 속 감정 표현과 실생활 일본어"
     },
@@ -66,6 +71,7 @@ const HomePage = () => {
       level: "N2",
       duration: "18:30",
       thumbnail: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=225&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
       rating: 4.9,
       description: "JLPT N2 필수 문법을 실제 사용 예시와 함께"
     },
@@ -76,8 +82,20 @@ const HomePage = () => {
       level: "N4",
       duration: "14:15",
       thumbnail: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=225&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
       rating: 4.5,
       description: "일본 여행에서 꼭 필요한 실전 회화 표현들"
+    },
+    {
+      id: 7,
+      title: "J-POP으로 배우는 감정 표현",
+      category: "노래",
+      level: "N3",
+      duration: "9:30",
+      thumbnail: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=225&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+      rating: 4.8,
+      description: "인기 J-POP 가사로 자연스러운 감정 표현 배우기"
     }
   ];
   
@@ -85,7 +103,8 @@ const HomePage = () => {
     ? contents 
     : contents.filter(content => 
         content.category.toLowerCase() === selectedFilter || 
-        (selectedFilter === 'jlpt' && content.category === 'JLPT')
+        (selectedFilter === 'jlpt' && content.category === 'JLPT') ||
+        (selectedFilter === 'music' && content.category === '노래')
       );
   
   return (
@@ -99,7 +118,7 @@ const HomePage = () => {
           살아있는 일본어 학습
         </h2>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          애니메이션, 드라마, 뉴스 등 실제 일본 미디어 콘텐츠로 JLPT부터 실전 회화까지 한 번에!
+          애니메이션, 드라마, 뉴스, 노래 등 실제 일본 미디어 콘텐츠로 JLPT부터 실전 회화까지 한 번에!
         </p>
       </div>
       
@@ -130,10 +149,22 @@ const HomePage = () => {
           <Card key={content.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-pink-100">
             <CardHeader className="p-0">
               <div className="relative overflow-hidden rounded-t-lg">
-                <img 
-                  src={content.thumbnail} 
-                  alt={content.title}
+                <video 
+                  src={content.videoUrl}
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  onError={(e) => {
+                    // Fallback to image if video fails to load
+                    const video = e.target as HTMLVideoElement;
+                    const img = document.createElement('img');
+                    img.src = content.thumbnail;
+                    img.className = video.className;
+                    img.alt = content.title;
+                    video.parentNode?.replaceChild(img, video);
+                  }}
                 />
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                   <Play className="w-12 h-12 text-white opacity-80 group-hover:opacity-100 transition-opacity" />

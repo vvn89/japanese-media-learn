@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import HomePage from '../components/HomePage';
 import ContentDetail from '../components/ContentDetail';
+import MediaViewer from '../components/MediaViewer';
 import Vocabulary from '../components/Vocabulary';
 import CreatorDashboard from '../components/CreatorDashboard';
 import Header from '../components/Header';
@@ -25,6 +26,7 @@ const Index = () => {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/content/:id" element={<ContentDetail />} />
+              <Route path="/media/:id" element={<MediaViewer />} />
               <Route path="/vocabulary" element={<Vocabulary />} />
               <Route path="/creator" element={<CreatorDashboard />} />
             </Routes>
