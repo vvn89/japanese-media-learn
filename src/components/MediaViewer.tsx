@@ -3,7 +3,8 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, Pause, RotateCcw, ArrowLeft, Volume2, X, Plus } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Play, Pause, RotateCcw, ArrowLeft, Volume2, X, Plus, Bookmark, BookmarkPlus } from 'lucide-react';
 import { toast } from 'sonner';
 
 const MediaViewer = () => {
@@ -19,23 +20,26 @@ const MediaViewer = () => {
   const [currentSentence, setCurrentSentence] = useState(0);
   const [selectedWord, setSelectedWord] = useState<any>(null);
   const [showWordPopup, setShowWordPopup] = useState(false);
+  const [subtitleMode, setSubtitleMode] = useState('both'); // 'korean', 'both', 'japanese'
+  const [japaneseMode, setJapaneseMode] = useState('kanji'); // 'kanji', 'furigana'
+  const [bookmarkedSentences, setBookmarkedSentences] = useState<Set<number>>(new Set());
   const audioRef = useRef<HTMLAudioElement>(null);
   
   // Mock word database with levels
   const wordDatabase = {
-    "こんにちは": { korean: "안녕하세요", pronunciation: "konnichiwa", level: "N5" },
-    "皆さん": { korean: "여러분", pronunciation: "minasan", level: "N4" },
-    "今日": { korean: "오늘", pronunciation: "kyō", level: "N5" },
-    "会議": { korean: "회의", pronunciation: "kaigi", level: "N3" },
-    "始める": { korean: "시작하다", pronunciation: "hajimeru", level: "N4" },
-    "いただく": { korean: "받다(겸양어)", pronunciation: "itadaku", level: "N3" },
-    "まず": { korean: "먼저", pronunciation: "mazu", level: "N3" },
-    "売上": { korean: "매출", pronunciation: "uriage", level: "N2" },
-    "について": { korean: "~에 대해", pronunciation: "ni tsuite", level: "N3" },
-    "話し合う": { korean: "이야기하다", pronunciation: "hanashiau", level: "N3" },
-    "今月": { korean: "이번 달", pronunciation: "kongetsu", level: "N4" },
-    "予想": { korean: "예상", pronunciation: "yosō", level: "N2" },
-    "上回る": { korean: "넘어서다", pronunciation: "uwamawaru", level: "N1" }
+    "こんにちは": { korean: "안녕하세요", pronunciation: "こんにちは", level: "N5" },
+    "皆さん": { korean: "여러분", pronunciation: "みなさん", level: "N4" },
+    "今日": { korean: "오늘", pronunciation: "きょう", level: "N5" },
+    "会議": { korean: "회의", pronunciation: "かいぎ", level: "N3" },
+    "始める": { korean: "시작하다", pronunciation: "はじめる", level: "N4" },
+    "いただく": { korean: "받다(겸양어)", pronunciation: "いただく", level: "N3" },
+    "まず": { korean: "먼저", pronunciation: "まず", level: "N3" },
+    "売上": { korean: "매출", pronunciation: "うりあげ", level: "N2" },
+    "について": { korean: "~에 대해", pronunciation: "について", level: "N3" },
+    "話し合う": { korean: "이야기하다", pronunciation: "はなしあう", level: "N3" },
+    "今月": { korean: "이번 달", pronunciation: "こんげつ", level: "N4" },
+    "予想": { korean: "예상", pronunciation: "よそう", level: "N2" },
+    "上回る": { korean: "넘어서다", pronunciation: "うわまわる", level: "N1" }
   };
   
   const getLevelColor = (level: string) => {
@@ -108,6 +112,18 @@ const MediaViewer = () => {
     toast.success(`"${wordData.japanese}" 단어를 단어장에 추가했습니다!`);
     setShowWordPopup(false);
   };
+
+  const toggleSentenceBookmark = (sentenceId: number) => {
+    const newBookmarked = new Set(bookmarkedSentences);
+    if (newBookmarked.has(sentenceId)) {
+      newBookmarked.delete(sentenceId);
+      toast.success("북마크를 해제했습니다");
+    } else {
+      newBookmarked.add(sentenceId);
+      toast.success("문장을 북마크했습니다");
+    }
+    setBookmarkedSentences(newBookmarked);
+  };
   
   // Mock data for content
   const content = {
@@ -127,32 +143,36 @@ const MediaViewer = () => {
       startTime: 0,
       endTime: 3,
       japanese: "こんにちは、皆さん。",
+      japaneseFurigana: "こんにちは、みなさん。",
       korean: "안녕하세요, 여러분.",
-      pronunciation: "Konnichiwa, minasan."
+      pronunciation: "こんにちは、みなさん。"
     },
     {
       id: 1,
       startTime: 3,
       endTime: 7,
       japanese: "今日の会議を始めさせていただきます。",
+      japaneseFurigana: "きょうのかいぎをはじめさせていただきます。",
       korean: "오늘 회의를 시작하겠습니다.",
-      pronunciation: "Kyō no kaigi wo hajimesasete itadakimasu."
+      pronunciation: "きょうのかいぎをはじめさせていただきます。"
     },
     {
       id: 2,
       startTime: 7,
       endTime: 12,
       japanese: "まず、売上について話し合いましょう。", 
+      japaneseFurigana: "まず、うりあげについてはなしあいましょう。",
       korean: "먼저 매출에 대해 이야기해봅시다.",
-      pronunciation: "Mazu, uriage ni tsuite hanashiaimashō."
+      pronunciation: "まず、うりあげについてはなしあいましょう。"
     },
     {
       id: 3,
       startTime: 12,
       endTime: 17,
       japanese: "今月の売上は予想を上回りました。",
+      japaneseFurigana: "こんげつのうりあげはよそうをうわまわりました。",
       korean: "이번 달 매출은 예상을 넘어섰습니다.",
-      pronunciation: "Kongetsu no uriage wa yosō wo uwamwarimashita."
+      pronunciation: "こんげつのうりあげはよそうをうわまわりました。"
     }
   ];
   
@@ -352,6 +372,48 @@ const MediaViewer = () => {
         </CardContent>
       </Card>
       
+      {/* Subtitle Options */}
+      <Card className="border-pink-100">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Volume2 className="w-5 h-5" />
+            자막 설정
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium mb-2">자막 표시</label>
+              <Select value={subtitleMode} onValueChange={setSubtitleMode}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="korean">한국어만</SelectItem>
+                  <SelectItem value="both">한국어 + 일본어</SelectItem>
+                  <SelectItem value="japanese">일본어만</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {(subtitleMode === 'japanese' || subtitleMode === 'both') && (
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-2">일본어 표시</label>
+                <Select value={japaneseMode} onValueChange={setJapaneseMode}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="kanji">한자 포함</SelectItem>
+                    <SelectItem value="furigana">히라가나만</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      
       {/* Enhanced Subtitles Section with Clickable Words */}
       <Card className="border-pink-100">
         <CardHeader>
@@ -363,7 +425,9 @@ const MediaViewer = () => {
         <CardContent>
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {subtitles.map((subtitle) => {
-              const parsedJapanese = parseJapaneseText(subtitle.japanese);
+              const parsedJapanese = parseJapaneseText(
+                japaneseMode === 'furigana' ? subtitle.japaneseFurigana : subtitle.japanese
+              );
               
               return (
                 <div
@@ -379,27 +443,49 @@ const MediaViewer = () => {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="font-medium text-lg mb-1 leading-relaxed">
-                        {parsedJapanese.map((segment, index) => (
-                          segment.isWord ? (
-                            <span
-                              key={index}
-                              className={`inline-block px-1 py-0.5 rounded text-sm font-semibold ${getLevelColor(segment.wordData.level)}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleWordClick(segment.wordData);
-                              }}
-                            >
-                              {segment.text}
-                            </span>
-                          ) : (
-                            <span key={index}>{segment.text}</span>
-                          )
-                        ))}
-                      </div>
-                      <p className="text-gray-600 mb-1">{subtitle.korean}</p>
+                      {(subtitleMode === 'japanese' || subtitleMode === 'both') && (
+                        <div className="font-medium text-lg mb-1 leading-relaxed">
+                          {parsedJapanese.map((segment, index) => (
+                            segment.isWord ? (
+                              <span
+                                key={index}
+                                className={`inline-block px-1 py-0.5 rounded text-sm font-semibold ${getLevelColor(segment.wordData.level)}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleWordClick(segment.wordData);
+                                }}
+                              >
+                                {segment.text}
+                              </span>
+                            ) : (
+                              <span key={index}>{segment.text}</span>
+                            )
+                          ))}
+                        </div>
+                      )}
+                      
+                      {(subtitleMode === 'korean' || subtitleMode === 'both') && (
+                        <p className="text-gray-600 mb-1">{subtitle.korean}</p>
+                      )}
+                      
                       <p className="text-sm text-gray-500 italic">{subtitle.pronunciation}</p>
                     </div>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSentenceBookmark(subtitle.id);
+                      }}
+                      className={`ml-2 ${bookmarkedSentences.has(subtitle.id) ? 'text-pink-600' : 'text-gray-400'}`}
+                    >
+                      {bookmarkedSentences.has(subtitle.id) ? (
+                        <Bookmark className="w-4 h-4 fill-current" />
+                      ) : (
+                        <BookmarkPlus className="w-4 h-4" />
+                      )}
+                    </Button>
                   </div>
                 </div>
               );
