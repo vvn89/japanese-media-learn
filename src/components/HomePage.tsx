@@ -1,16 +1,18 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Play, Clock, Users, Star, Music, BookOpen, Tv, Radio, Newspaper, GraduationCap } from 'lucide-react';
+import ContentFilter from './ContentFilter';
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [hoveredVideo, setHoveredVideo] = useState<number | null>(null);
+  const [sortBy, setSortBy] = useState('views');
+  const [durationFilter, setDurationFilter] = useState([0, 60]);
+  const [levelFilter, setLevelFilter] = useState<string[]>([]);
   
   const categories = [
     { name: '전체', icon: Star },
@@ -23,7 +25,7 @@ const HomePage = () => {
     { name: '라디오', icon: Radio }
   ];
   
-  // Mock content data with enhanced JLPT content
+  // Mock content data with enhanced properties for filtering/sorting
   const mockContent = [
     {
       id: 1,
@@ -31,7 +33,11 @@ const HomePage = () => {
       category: "회화",
       level: "N2",
       duration: "12:34",
+      durationMinutes: 12,
       views: "1.2k",
+      viewsNumber: 1200,
+      bookmarks: 85,
+      createdAt: "2024-01-15",
       thumbnail: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=450&fit=crop",
       videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
       isJLPTExclusive: false
@@ -42,7 +48,11 @@ const HomePage = () => {
       category: "뉴스",
       level: "N1",
       duration: "15:20",
+      durationMinutes: 15,
       views: "850",
+      viewsNumber: 850,
+      bookmarks: 45,
+      createdAt: "2024-01-10",
       thumbnail: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&h=450&fit=crop",
       videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
       isJLPTExclusive: false
@@ -53,7 +63,11 @@ const HomePage = () => {
       category: "애니메이션",
       level: "N3",
       duration: "8:45",
+      durationMinutes: 8,
       views: "2.1k",
+      viewsNumber: 2100,
+      bookmarks: 150,
+      createdAt: "2024-01-15",
       thumbnail: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=450&fit=crop",
       videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
       isJLPTExclusive: false
@@ -64,7 +78,11 @@ const HomePage = () => {
       category: "노래",
       level: "N4",
       duration: "10:15",
+      durationMinutes: 10,
       views: "3.5k",
+      viewsNumber: 3500,
+      bookmarks: 200,
+      createdAt: "2024-01-10",
       thumbnail: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=450&fit=crop",
       videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
       isJLPTExclusive: false
@@ -76,7 +94,11 @@ const HomePage = () => {
       category: "JLPT",
       level: "N2",
       duration: "25:30",
+      durationMinutes: 25,
       views: "4.2k",
+      viewsNumber: 4200,
+      bookmarks: 100,
+      createdAt: "2024-01-15",
       thumbnail: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&h=450&fit=crop",
       videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
       isJLPTExclusive: true,
@@ -91,7 +113,11 @@ const HomePage = () => {
       category: "JLPT",
       level: "N3",
       duration: "18:45",
+      durationMinutes: 18,
       views: "3.1k",
+      viewsNumber: 3100,
+      bookmarks: 120,
+      createdAt: "2024-01-10",
       thumbnail: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&h=450&fit=crop",
       videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
       isJLPTExclusive: true,
@@ -105,19 +131,70 @@ const HomePage = () => {
       category: "JLPT",
       level: "N1",
       duration: "32:15",
+      durationMinutes: 32,
       views: "2.8k",
+      viewsNumber: 2800,
+      bookmarks: 150,
+      createdAt: "2024-01-15",
       thumbnail: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=450&fit=crop",
       videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
       isJLPTExclusive: true,
       relatedMedia: [
         { id: 2, title: "일본 뉴스로 배우는 시사 일본어", category: "뉴스" }
       ]
+    },
+    {
+      id: 8,
+      title: "J-POP으로 배우는 감정 표현",
+      category: "노래",
+      level: "N3",
+      duration: "8:30",
+      durationMinutes: 8,
+      views: "2.8k",
+      viewsNumber: 2800,
+      bookmarks: 120,
+      createdAt: "2024-01-20",
+      thumbnail: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=450&fit=crop",
+      videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+      isJLPTExclusive: false
     }
   ];
   
-  const filteredContent = selectedCategory === '전체' 
-    ? mockContent 
-    : mockContent.filter(item => item.category === selectedCategory);
+  const getFilteredAndSortedContent = () => {
+    let filtered = selectedCategory === '전체' 
+      ? mockContent 
+      : mockContent.filter(item => item.category === selectedCategory);
+    
+    // Apply level filter
+    if (levelFilter.length > 0) {
+      filtered = filtered.filter(item => levelFilter.includes(item.level));
+    }
+    
+    // Apply duration filter
+    filtered = filtered.filter(item => 
+      item.durationMinutes >= durationFilter[0] && 
+      item.durationMinutes <= durationFilter[1]
+    );
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'views':
+          return b.viewsNumber - a.viewsNumber;
+        case 'bookmarks':
+          return b.bookmarks - a.bookmarks;
+        case 'recent':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'level':
+          const levelOrder = { 'N5': 5, 'N4': 4, 'N3': 3, 'N2': 2, 'N1': 1 };
+          return levelOrder[a.level as keyof typeof levelOrder] - levelOrder[b.level as keyof typeof levelOrder];
+        default:
+          return 0;
+      }
+    });
+    
+    return filtered;
+  };
   
   const getLevelColor = (level: string) => {
     const colors = {
@@ -138,45 +215,61 @@ const HomePage = () => {
     }
   };
   
+  const filteredContent = getFilteredAndSortedContent();
+  
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      {/* Hero Section */}
-      <div className="text-center space-y-4 py-12 bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl">
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+    <div className="max-w-7xl mx-auto space-y-6 pb-20"> {/* Added bottom padding for mobile navigation */}
+      {/* Hero Section - Mobile optimized */}
+      <div className="text-center space-y-4 py-8 px-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl">
+        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
           MediaCademy
         </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
           실제 일본 미디어로 배우는 살아있는 일본어
         </p>
-        <p className="text-gray-500">
+        <p className="text-sm md:text-base text-gray-500">
           애니메이션, 드라마, 뉴스, 노래까지! 다양한 콘텐츠로 자연스럽게 일본어를 익혀보세요
         </p>
       </div>
       
-      {/* Category Filter */}
-      <div className="flex flex-wrap gap-2 justify-center">
-        {categories.map((category) => {
-          const Icon = category.icon;
-          return (
-            <Button
-              key={category.name}
-              onClick={() => setSelectedCategory(category.name)}
-              variant={selectedCategory === category.name ? "default" : "outline"}
-              className={`${
-                selectedCategory === category.name 
-                  ? "bg-pink-500 hover:bg-pink-600 text-white" 
-                  : "border-pink-200 text-pink-700 hover:bg-pink-50"
-              }`}
-            >
-              <Icon className="w-4 h-4 mr-2" />
-              {category.name}
-            </Button>
-          );
-        })}
+      {/* Category Filter - Mobile scrollable */}
+      <div className="overflow-x-auto pb-2">
+        <div className="flex gap-2 min-w-max px-4 md:px-0 md:flex-wrap md:justify-center">
+          {categories.map((category) => {
+            const Icon = category.icon;
+            return (
+              <Button
+                key={category.name}
+                onClick={() => setSelectedCategory(category.name)}
+                variant={selectedCategory === category.name ? "default" : "outline"}
+                className={`whitespace-nowrap ${
+                  selectedCategory === category.name 
+                    ? "bg-pink-500 hover:bg-pink-600 text-white" 
+                    : "border-pink-200 text-pink-700 hover:bg-pink-50"
+                }`}
+              >
+                <Icon className="w-4 h-4 mr-2" />
+                {category.name}
+              </Button>
+            );
+          })}
+        </div>
       </div>
       
-      {/* Content Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* Content Filter - Mobile friendly */}
+      <div className="px-4 md:px-0">
+        <ContentFilter
+          onSortChange={setSortBy}
+          onDurationFilterChange={setDurationFilter}
+          onLevelFilterChange={setLevelFilter}
+          selectedSort={sortBy}
+          selectedDuration={durationFilter}
+          selectedLevels={levelFilter}
+        />
+      </div>
+      
+      {/* Content Grid - Mobile responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-4 md:px-0">
         {filteredContent.map((content) => (
           <Card 
             key={content.id} 
@@ -221,33 +314,19 @@ const HomePage = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-4">
-              <CardTitle className="text-lg mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors">
+            <CardContent className="p-3 md:p-4">
+              <CardTitle className="text-sm md:text-base mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors">
                 {content.title}
               </CardTitle>
-              <div className="flex items-center justify-between text-sm text-gray-500">
+              <div className="flex items-center justify-between text-xs md:text-sm text-gray-500">
                 <span className="flex items-center">
                   <Play className="w-3 h-3 mr-1" />
                   {content.views} 시청
                 </span>
-                <Badge variant="outline" className="border-pink-200 text-pink-700">
+                <Badge variant="outline" className="border-pink-200 text-pink-700 text-xs">
                   {content.category}
                 </Badge>
               </div>
-              
-              {/* Show related media for JLPT content */}
-              {content.isJLPTExclusive && content.relatedMedia && (
-                <div className="mt-3 pt-3 border-t border-gray-100">
-                  <p className="text-xs text-gray-500 mb-2">관련 미디어:</p>
-                  <div className="space-y-1">
-                    {content.relatedMedia.map((media) => (
-                      <div key={media.id} className="text-xs text-pink-600 hover:text-pink-800 cursor-pointer">
-                        • {media.title}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </CardContent>
           </Card>
         ))}
@@ -255,10 +334,14 @@ const HomePage = () => {
       
       {/* Empty State */}
       {filteredContent.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg mb-4">선택한 카테고리에 콘텐츠가 없습니다</p>
+        <div className="text-center py-12 px-4">
+          <p className="text-gray-500 text-lg mb-4">조건에 맞는 콘텐츠가 없습니다</p>
           <Button 
-            onClick={() => setSelectedCategory('전체')}
+            onClick={() => {
+              setSelectedCategory('전체');
+              setLevelFilter([]);
+              setDurationFilter([0, 60]);
+            }}
             className="bg-pink-500 hover:bg-pink-600"
           >
             전체 콘텐츠 보기
